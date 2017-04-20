@@ -44,7 +44,7 @@ var RestartBtn = (function (_super) {
         this.addChild(btn);
     };
     RestartBtn.prototype.onTouchTap = function () {
-        alert('地啊你');
+        alert('重新开始游戏');
     };
     return RestartBtn;
 }(egret.DisplayObjectContainer));

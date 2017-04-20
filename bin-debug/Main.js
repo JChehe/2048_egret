@@ -129,9 +129,10 @@ var Main = (function (_super) {
         this.stage.addChild(this.scorePanel);
         this.restartBtn = new RestartBtn(210 * 2, 85 * 2);
         this.stage.addChild(this.restartBtn);
-        this.addMainBg();
         this.addHowToPlay();
         this.addCopyRight();
+        this.game = new Game();
+        this.stage.addChild(this.game);
     };
     Main.prototype.setGameBg = function () {
         var rect = new egret.Shape();
@@ -158,18 +159,12 @@ var Main = (function (_super) {
         gameSlogan.text = '叠加数字，以最快速度达到2048吧！';
         gameSlogan.size = 12 * 2;
         gameSlogan.width = 132 * 2;
+        gameSlogan.lineSpacing = 5 * 2;
         gameSlogan.textColor = Main.FONT_COLOR;
         gameSlogan.fontFamily = Main.FONT_FAMILY;
         gameSlogan.x = Main.paddingLeft;
         gameSlogan.y = 88 * 2;
         this.addChild(gameSlogan);
-    };
-    Main.prototype.addMainBg = function () {
-        var roundRect = new egret.Shape();
-        roundRect.graphics.beginFill(0x92DAF2);
-        roundRect.graphics.drawRoundRect(Main.paddingLeft, 150 * 2, 282 * 2, 282 * 2, 8 * 2);
-        roundRect.$graphics.endFill();
-        this.addChild(roundRect);
     };
     Main.prototype.addHowToPlay = function () {
         var p1 = new egret.TextField();

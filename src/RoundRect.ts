@@ -42,7 +42,7 @@ class RoundRect extends egret.DisplayObjectContainer{
 		title.textColor = Main.FONT_COLOR
 		title.width = this._min_Width
 		title.height = 17 * 2
-		title.y = 4 * 2
+		title.y = 6 * 2
 		title.textAlign = egret.HorizontalAlign.CENTER
 		
 		this.addChild(title)

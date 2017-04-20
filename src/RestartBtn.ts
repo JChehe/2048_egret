@@ -43,6 +43,6 @@ class RestartBtn extends egret.DisplayObjectContainer{
 	}
 
 	private onTouchTap():void {
-		alert('地啊你')
+		alert('重新开始游戏')
 	}
 }

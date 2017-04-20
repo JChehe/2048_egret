@@ -37,6 +37,7 @@ class Main extends egret.DisplayObjectContainer {
     private scorePanel: RoundRect
     private bestPanel: RoundRect
     private restartBtn: RestartBtn
+    private game: Game
 
     private readonly GAME_BG_COLOR:number = 0x8DECD3
     static readonly FONT_COLOR:number = 0x5FB4AE
@@ -158,10 +159,12 @@ class Main extends egret.DisplayObjectContainer {
         this.restartBtn = new RestartBtn(210 * 2, 85 * 2)
         this.stage.addChild(this.restartBtn)
 
-        this.addMainBg()
         this.addHowToPlay()
 
         this.addCopyRight()
+
+        this.game = new Game()
+        this.stage.addChild(this.game)
     }
     private setGameBg():void {
         let rect:egret.Shape = new egret.Shape()
@@ -190,22 +193,13 @@ class Main extends egret.DisplayObjectContainer {
         gameSlogan.text = '叠加数字，以最快速度达到2048吧！'
         gameSlogan.size = 12 * 2
         gameSlogan.width = 132 * 2
+        gameSlogan.lineSpacing = 5 * 2
         gameSlogan.textColor = Main.FONT_COLOR
         gameSlogan.fontFamily = Main.FONT_FAMILY
         gameSlogan.x = Main.paddingLeft
         gameSlogan.y = 88 * 2
 
         this.addChild(gameSlogan)
-    }
-
-    private addMainBg():void {
-        let roundRect: egret.Shape = new egret.Shape()
-
-        roundRect.graphics.beginFill(0x92DAF2)
-        roundRect.graphics.drawRoundRect(Main.paddingLeft, 150 * 2, 282 * 2, 282 * 2, 8 * 2)
-        roundRect.$graphics.endFill()
-
-        this.addChild(roundRect)
     }
 
     private addHowToPlay():void {
