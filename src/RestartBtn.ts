@@ -4,7 +4,7 @@ class RestartBtn extends egret.DisplayObjectContainer{
 	private _width = 119 * 2
 	private _height = 40 * 2
 	private _radius = 3 * 2
-	public constructor(private _x: number, private _y: number) {
+	public constructor(private _x: number, private _y: number, private text:string = 'New Game') {
 		super()
 		
 		this.x = this._x
@@ -30,7 +30,7 @@ class RestartBtn extends egret.DisplayObjectContainer{
 
 	private addText():void {
 		let btn:egret.TextField = new egret.TextField()
-		btn.text = 'New Game'
+		btn.text = this.text
 		btn.size = 15 * 2
 		btn.textColor = this.FONT_COLOR
 		btn.width = this._width

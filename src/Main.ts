@@ -37,6 +37,7 @@ class Main extends egret.DisplayObjectContainer {
     private scorePanel: RoundRect
     private bestPanel: RoundRect
     private restartBtn: RestartBtn
+    private dialog: Dialog
     private game: Game
 
     private readonly GAME_BG_COLOR:number = 0x8DECD3
@@ -135,13 +136,7 @@ class Main extends egret.DisplayObjectContainer {
      * Create a game scene
      */
     private createGameScene() {
-        
 
-        this.init()
-
-    }
-
-    private init() {
         Main.stageW = this.stage.stageWidth
         Main.stageH = this.stage.stageHeight
 
@@ -165,7 +160,12 @@ class Main extends egret.DisplayObjectContainer {
 
         this.game = new Game()
         this.stage.addChild(this.game)
+
+        this.dialog = new Dialog()
+        this.stage.addChild(this.dialog)
+
     }
+
     private setGameBg():void {
         let rect:egret.Shape = new egret.Shape()
         rect.graphics.beginFill(this.GAME_BG_COLOR)

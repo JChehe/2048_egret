@@ -8,10 +8,12 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var RestartBtn = (function (_super) {
     __extends(RestartBtn, _super);
-    function RestartBtn(_x, _y) {
+    function RestartBtn(_x, _y, text) {
+        if (text === void 0) { text = 'New Game'; }
         var _this = _super.call(this) || this;
         _this._x = _x;
         _this._y = _y;
+        _this.text = text;
         _this.BG_COLOR = 0xA3D4DC;
         _this.FONT_COLOR = 0xffffff;
         _this._width = 119 * 2;
@@ -34,7 +36,7 @@ var RestartBtn = (function (_super) {
     };
     RestartBtn.prototype.addText = function () {
         var btn = new egret.TextField();
-        btn.text = 'New Game';
+        btn.text = this.text;
         btn.size = 15 * 2;
         btn.textColor = this.FONT_COLOR;
         btn.width = this._width;

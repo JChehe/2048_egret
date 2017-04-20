@@ -114,9 +114,6 @@ var Main = (function (_super) {
      * Create a game scene
      */
     Main.prototype.createGameScene = function () {
-        this.init();
-    };
-    Main.prototype.init = function () {
         Main.stageW = this.stage.stageWidth;
         Main.stageH = this.stage.stageHeight;
         // 按照游戏的层级关系进行添加元素，否则会盖住
@@ -133,6 +130,8 @@ var Main = (function (_super) {
         this.addCopyRight();
         this.game = new Game();
         this.stage.addChild(this.game);
+        this.dialog = new Dialog();
+        this.stage.addChild(this.dialog);
     };
     Main.prototype.setGameBg = function () {
         var rect = new egret.Shape();
