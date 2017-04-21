@@ -23,6 +23,7 @@ var Game = (function (_super) {
         _this._mainBgColor = 0x92DAF2;
         _this._gridWidth = (_this._sideLength - (_this._col + 1) * _this._gridSpacing) / _this._col;
         _this._gridHeight = (_this._sideLength - (_this._row + 1) * _this._gridSpacing) / _this._row;
+        _this._girds = new egret.DisplayObjectContainer();
         _this._gridInfo = [
             {
                 "num": 2,
@@ -103,6 +104,8 @@ var Game = (function (_super) {
                 "fontSize": 35
             }
         ];
+        _this._addGridAmount = 2;
+        _this.grids = [];
         _this.x = _this._x;
         _this.y = _this._y;
         _this.addMainBg();
@@ -110,8 +113,108 @@ var Game = (function (_super) {
         document.addEventListener('keyup', Game.onKeyup, false);
         _this.touchEnabled = true;
         _this.addEventListener(egret.TouchEvent.TOUCH_BEGIN, _this.onGameTouchBegin, _this);
+        _this.initGrids();
+        _this.addGrids();
+        _this.addChild(_this._girds);
+        _this.addEventListener(egret.Event.ENTER_FRAME, function (evt) {
+            for (var i = 0; i < _this._row; i++) {
+                for (var j = 0; j < _this._col; j++) {
+                    if (_this.grids[i][j] !== 0) {
+                        _this.drawGrid(i, j, _this.grids[i][j]);
+                    }
+                }
+            }
+            console.log('循环');
+        }, _this);
         return _this;
     }
+    Game.prototype.restart = function () {
+        this.initGrids();
+        this._girds.removeChildren();
+        this.addGrids();
+    };
+    Game.prototype.initGrids = function () {
+        // 初始所有格子为 0，即不显示
+        for (var i = 0; i < this._row; i++) {
+            this.grids[i] = [];
+            for (var j = 0; j < this._col; j++) {
+                this.grids[i][j] = 0;
+            }
+        }
+    };
+    Game.prototype.drawGrid = function (row, col, num) {
+        var indexInOneDimensionalArr = row * this._col + col;
+        var left = this.getLeftByIndex(indexInOneDimensionalArr);
+        var top = this.getTopByIndex(indexInOneDimensionalArr);
+        var gridInfo = this.getGridInfoByNum(num);
+        var grid = new egret.Sprite;
+        grid.name = "grid-" + row + "-" + col;
+        grid.x = left;
+        grid.y = top;
+        grid.graphics.beginFill(gridInfo.backgroundColor, 1);
+        grid.graphics.drawRoundRect(0, 0, this._gridWidth, this._gridWidth, this._gridRadius);
+        grid.graphics.endFill();
+        var content = new egret.TextField();
+        content.text = num;
+        content.width = this._gridWidth;
+        content.height = this._gridHeight;
+        content.size = gridInfo.fontSize;
+        content.textColor = gridInfo.color;
+        content.textAlign = egret.HorizontalAlign.CENTER;
+        content.verticalAlign = egret.VerticalAlign.MIDDLE;
+        grid.addChild(content);
+        this._girds.addChild(grid);
+    };
+    Game.prototype.getGridInfoByNum = function (targetNum) {
+        var resultItem;
+        this._gridInfo.forEach(function (item) {
+            if (item.num === targetNum) {
+                resultItem = item;
+            }
+        });
+        // 找不到就返回最后一个
+        return resultItem || this._gridInfo[this._gridInfo.length - 1];
+    };
+    Game.prototype.addGrids = function () {
+        // 找出所有为0的格子
+        var emptyGrids = [];
+        for (var i = 0; i < this._row; i++) {
+            for (var j = 0; j < this._col; j++) {
+                if (this.grids[i][j] === 0) {
+                    emptyGrids.push({
+                        x: i,
+                        y: j
+                    });
+                }
+            }
+        }
+        // 判断空格还有几个，若 >= 2，则添加两个，否则添加剩余数量的格子
+        var needAddGridsAmount = Math.min(this._addGridAmount, emptyGrids.length);
+        var finalNeedToAddGridsCoord = [];
+        for (var i = 0; i < needAddGridsAmount; i++) {
+            var index = this.getRandomInt(0, emptyGrids.length - 1);
+            finalNeedToAddGridsCoord.push(emptyGrids[index]);
+            emptyGrids.splice(index, 1);
+        }
+        for (var i = 0; i < finalNeedToAddGridsCoord.length; i++) {
+            // let x = this.getRowByIndex(finalNeedToAddGridsIndexes[i])
+            // let y = this.getColByIndex(finalNeedToAddGridsIndexes[i])
+            var x = finalNeedToAddGridsCoord[i].x;
+            var y = finalNeedToAddGridsCoord[i].y;
+            this.grids[x][y] = this.getNewNumber();
+        }
+    };
+    /**
+     * Returns a random integer between min (inclusive) and max (inclusive)
+     * Using Math.round() will give you a non-uniform distribution!
+     */
+    Game.prototype.getRandomInt = function (min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+    Game.prototype.getNewNumber = function () {
+        var probability = Math.random();
+        return probability < 0.8 ? 2 : 4;
+    };
     Game.prototype.addMainBg = function () {
         var mainBg = new egret.Shape();
         mainBg.graphics.beginFill(this._mainBgColor);
@@ -121,11 +224,11 @@ var Game = (function (_super) {
     };
     Game.prototype.addGridBg = function () {
         for (var i = 0; i < this._gridAmount; i++) {
-            var x = this.getLeftByIndex(i);
-            var y = this.getTopByIndex(i);
+            var left = this.getLeftByIndex(i);
+            var top_1 = this.getTopByIndex(i);
             var cell = new egret.Shape();
             cell.graphics.beginFill(this._gridBgColor, 0.35);
-            cell.graphics.drawRoundRect(x, y, this._gridWidth, this._gridHeight, this._gridRadius);
+            cell.graphics.drawRoundRect(left, top_1, this._gridWidth, this._gridHeight, this._gridRadius);
             cell.graphics.endFill();
             this.addChild(cell);
         }

@@ -12,7 +12,6 @@ class RoundRect extends egret.DisplayObjectContainer{
 	{
 		super()
 		this.init()
-
 		return this
 	}
 
@@ -50,6 +49,7 @@ class RoundRect extends egret.DisplayObjectContainer{
 
 	private addContent():void {
 		let content: egret.TextField = new egret.TextField()
+		content.name = 'content'
 		content.text = this._content.toString()
 		content.size = 25 * 2
 		content.textColor = 0xffffff
@@ -59,6 +59,13 @@ class RoundRect extends egret.DisplayObjectContainer{
 		content.textAlign = egret.HorizontalAlign.CENTER
 		content.verticalAlign = egret.VerticalAlign.MIDDLE;
 		this.addChild(content)
+	}
+
+	public restart():void {
+		console.log('被触发啦')
+		this._content = 0
+		this.removeChild(this.getChildByName('content'))
+		this.addContent()
 	}
 
 }

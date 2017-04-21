@@ -11,9 +11,11 @@ var game_file_list = [
 	"bin-debug/Dashboard.js",
 	"bin-debug/Dialog.js",
 	"bin-debug/Game.js",
+	"bin-debug/GameOther.js",
 	"bin-debug/LoadingUI.js",
 	"bin-debug/Main.js",
 	"bin-debug/RestartBtn.js",
+	"bin-debug/RestartEvent.js",
 	"bin-debug/RoundRect.js",
 	//----auto game_file_list end----
 ];

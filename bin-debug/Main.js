@@ -38,10 +38,13 @@ var Main = (function (_super) {
     __extends(Main, _super);
     function Main() {
         var _this = _super.call(this) || this;
-        _this.GAME_BG_COLOR = 0x8DECD3;
         _this.addEventListener(egret.Event.ADDED_TO_STAGE, _this.onAddToStage, _this);
         return _this;
     }
+    Main.prototype.restart = function () {
+        this.game.restart();
+        // this.scorePanel.
+    };
     Main.prototype.onAddToStage = function (event) {
         //设置加载进度界面
         //Config to load process interface
@@ -117,90 +120,29 @@ var Main = (function (_super) {
         Main.stageW = this.stage.stageWidth;
         Main.stageH = this.stage.stageHeight;
         // 按照游戏的层级关系进行添加元素，否则会盖住
-        this.setGameBg();
-        this.addGameName();
-        this.addGameSlogan();
-        this.scorePanel = new RoundRect(199 * 2, Main.paddingTop, 'SCORE', 0);
+        this.gameOther = new GameOther();
+        this.stage.addChild(this.gameOther);
+        this.scorePanel = new RoundRect(199 * 2, Main.paddingTop, 'SCORE', 88);
         this.stage.addChild(this.scorePanel);
-        this.scorePanel = new RoundRect(269 * 2, Main.paddingTop, 'BEST', 0);
-        this.stage.addChild(this.scorePanel);
+        this.bestPanel = new RoundRect(269 * 2, Main.paddingTop, 'BEST', 0);
+        this.stage.addChild(this.bestPanel);
         this.restartBtn = new RestartBtn(210 * 2, 85 * 2);
         this.stage.addChild(this.restartBtn);
-        this.addHowToPlay();
-        this.addCopyRight();
         this.game = new Game();
         this.stage.addChild(this.game);
-        this.dialog = new Dialog();
-        this.stage.addChild(this.dialog);
+        this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this); // this 参数用于指定回调函数内的this
+        if (Main.isGameOver) {
+            this.dialog = new Dialog();
+            this.stage.addChild(this.dialog);
+        }
     };
-    Main.prototype.setGameBg = function () {
-        var rect = new egret.Shape();
-        rect.graphics.beginFill(this.GAME_BG_COLOR);
-        rect.graphics.drawRect(0, 0, Main.stageW, Main.stageH);
-        rect.graphics.endFill();
-        this.addChild(rect);
-    };
-    Main.prototype.addGameName = function () {
-        var gameName = new egret.TextField();
-        gameName.text = '2048';
-        gameName.size = 28 * 2;
-        gameName.textColor = Main.FONT_COLOR;
-        gameName.fontFamily = Main.FONT_FAMILY;
-        gameName.bold = true;
-        gameName.height = 40 * 2;
-        gameName.verticalAlign = egret.VerticalAlign.BOTTOM;
-        gameName.x = Main.paddingLeft;
-        gameName.y = Main.paddingTop;
-        this.addChild(gameName);
-    };
-    Main.prototype.addGameSlogan = function () {
-        var gameSlogan = new egret.TextField();
-        gameSlogan.text = '叠加数字，以最快速度达到2048吧！';
-        gameSlogan.size = 12 * 2;
-        gameSlogan.width = 132 * 2;
-        gameSlogan.lineSpacing = 5 * 2;
-        gameSlogan.textColor = Main.FONT_COLOR;
-        gameSlogan.fontFamily = Main.FONT_FAMILY;
-        gameSlogan.x = Main.paddingLeft;
-        gameSlogan.y = 88 * 2;
-        this.addChild(gameSlogan);
-    };
-    Main.prototype.addHowToPlay = function () {
-        var p1 = new egret.TextField();
-        var p2 = new egret.TextField();
-        p1.text = '玩法：使用方向键/滑动的方式去移动砖块，当两块数值相同的方块发生碰撞，将会合成一块。';
-        p2.text = 'PS：方向键可以是↑↓←→ 或 WSAD。';
-        p1.x = p2.x = Main.paddingLeft;
-        p1.y = 463 * 2;
-        p2.y = 507 * 2;
-        p1.size = p2.size = 12 * 2;
-        p1.lineSpacing = p2.lineSpacing = 5 * 2;
-        p1.textColor = p2.textColor = Main.FONT_COLOR;
-        p1.width = p2.width = Main.stageW - Main.paddingLeft * 2;
-        this.addChild(p1);
-        this.addChild(p2);
-    };
-    Main.prototype.addCopyRight = function () {
-        var copyright = new egret.TextField();
-        /*copyright.textFlow = new Array<egret.ITextElement>(
-            { text: 'Designed & Developed by'},
-            { text: 'J.c', style: { href: 'event: text event triggered' }}
-        )*/
-        copyright.textFlow = new egret.HtmlTextParser().parser("Designed & Developed by <u><a href = 'https://github.com/JChehe'>J.c</a></u>");
-        copyright.touchEnabled = true;
-        copyright.addEventListener(egret.TextEvent.LINK, function (evt) {
-            console.log(evt.text);
-            window.open('https://github.com/JChehe');
-        }, this);
-        copyright.width = Main.stageW;
-        copyright.textAlign = egret.HorizontalAlign.CENTER;
-        copyright.size = 12 * 2;
-        copyright.textColor = Main.FONT_COLOR;
-        copyright.y = Main.stageH - 28 * 2;
-        this.addChild(copyright);
+    Main.prototype.restartHandle = function () {
+        this.scorePanel.restart();
+        this.game.restart();
     };
     return Main;
 }(egret.DisplayObjectContainer));
+Main.GAME_BG_COLOR = 0x8DECD3;
 Main.FONT_COLOR = 0x5FB4AE;
 Main.FONT_FAMILY = 'PingFang SC';
 Main.stageW = 0;
@@ -209,5 +151,6 @@ Main.paddingTop = 20 * 2;
 Main.paddingLeft = 47 * 2;
 Main.score = 0;
 Main.best = 0;
+Main.isGameOver = false;
 __reflect(Main.prototype, "Main");
 //# sourceMappingURL=Main.js.map

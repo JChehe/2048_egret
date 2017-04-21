@@ -27,6 +27,7 @@ var Dialog = (function (_super) {
         mask.graphics.drawRect(0, 0, Main.stageW, Main.stageH);
         mask.graphics.endFill();
         this.touchEnabled = true;
+        // 取消冒泡
         this.restartBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.stopRestartBtnPropagation, this);
         this.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onMaskTouchTap, this, false);
         this.addChild(mask);

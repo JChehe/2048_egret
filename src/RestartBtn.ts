@@ -43,6 +43,9 @@ class RestartBtn extends egret.DisplayObjectContainer{
 	}
 
 	private onTouchTap():void {
-		alert('重新开始游戏')
+		// alert('重新开始游戏')
+		// console.log(this)
+		let restartEvent: RestartEvent = new RestartEvent(RestartEvent.NAME)
+		this.dispatchEvent(restartEvent)
 	}
 }

@@ -46,7 +46,10 @@ var RestartBtn = (function (_super) {
         this.addChild(btn);
     };
     RestartBtn.prototype.onTouchTap = function () {
-        alert('重新开始游戏');
+        // alert('重新开始游戏')
+        // console.log(this)
+        var restartEvent = new RestartEvent(RestartEvent.NAME);
+        this.dispatchEvent(restartEvent);
     };
     return RestartBtn;
 }(egret.DisplayObjectContainer));

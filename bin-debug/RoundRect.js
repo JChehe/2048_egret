@@ -50,6 +50,7 @@ var RoundRect = (function (_super) {
     };
     RoundRect.prototype.addContent = function () {
         var content = new egret.TextField();
+        content.name = 'content';
         content.text = this._content.toString();
         content.size = 25 * 2;
         content.textColor = 0xffffff;
@@ -59,6 +60,12 @@ var RoundRect = (function (_super) {
         content.textAlign = egret.HorizontalAlign.CENTER;
         content.verticalAlign = egret.VerticalAlign.MIDDLE;
         this.addChild(content);
+    };
+    RoundRect.prototype.restart = function () {
+        console.log('被触发啦');
+        this._content = 0;
+        this.removeChild(this.getChildByName('content'));
+        this.addContent();
     };
     return RoundRect;
 }(egret.DisplayObjectContainer));
