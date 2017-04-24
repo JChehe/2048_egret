@@ -33,6 +33,7 @@ class Main extends egret.DisplayObjectContainer {
      * 加载进度界面
      * Process interface loading
      */
+    public static instance: Main
     private loadingView: LoadingUI
     private scorePanel: RoundRect
     private bestPanel: RoundRect
@@ -56,12 +57,9 @@ class Main extends egret.DisplayObjectContainer {
 
     public constructor() {
         super();
-        this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
-    }
 
-    private restart():void {
-        this.game.restart()
-        // this.scorePanel.
+        Main.instance = this
+        this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
     }
 
     private onAddToStage(event: egret.Event) {
@@ -143,7 +141,7 @@ class Main extends egret.DisplayObjectContainer {
      * 创建游戏场景
      * Create a game scene
      */
-    private createGameScene() {
+    private createGameScene():void {
 
         Main.stageW = this.stage.stageWidth
         Main.stageH = this.stage.stageHeight
@@ -164,20 +162,42 @@ class Main extends egret.DisplayObjectContainer {
         this.game = new Game()
         this.stage.addChild(this.game)
 
-        this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this) // this 参数用于指定回调函数内的this
-        
+        // this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this) // this 参数用于指定回调函数内的this
+        this.stage.addEventListener(GameOverEvent.NAME, this.gameOverHandle, this)
         if(Main.isGameOver) {
             this.dialog = new Dialog()
             this.stage.addChild(this.dialog)
         }
     }
 
-    private restartHandle() {
+    public restart():void {
         this.scorePanel.restart()
         this.game.restart()
-
+        this.dialog.triggerMaskTap()
+        console.log('触发game restart')
     }
 
+    private gameOverHandle():void {
+        console.log('Game Over Event')
+        if(!this.dialog) {
+            this.dialog = new Dialog()
+            this.stage.addChild(this.dialog)
+        }
+    }
+    public setDialogNull():void {
+        this.dialog = null
+    }
+
+    public updateScore(increment:number):void {
+        Main.score += increment
+
+        if(Main.score > this.bestPanel.getContent()) {
+            this.bestPanel.setContent(Main.score)
+        }
+        this.scorePanel.setContent(Main.score)
+    }
+
+    
 }
 
 

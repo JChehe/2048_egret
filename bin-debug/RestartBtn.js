@@ -25,8 +25,13 @@ var RestartBtn = (function (_super) {
         _this.addText();
         _this.touchEnabled = true;
         _this.addEventListener(egret.TouchEvent.TOUCH_TAP, _this.onTouchTap, _this, false);
+        _this.addEventListener(RestartEvent.NAME, _this.restartHandle, _this);
         return _this;
     }
+    RestartBtn.prototype.restartHandle = function () {
+        Main.instance.restart();
+        console.log('触发game restart');
+    };
     RestartBtn.prototype.addBg = function () {
         var bg = new egret.Shape();
         bg.graphics.beginFill(this.BG_COLOR);
@@ -47,7 +52,7 @@ var RestartBtn = (function (_super) {
     };
     RestartBtn.prototype.onTouchTap = function () {
         // alert('重新开始游戏')
-        // console.log(this)
+        console.log(this);
         var restartEvent = new RestartEvent(RestartEvent.NAME);
         this.dispatchEvent(restartEvent);
     };

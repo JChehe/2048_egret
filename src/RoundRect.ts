@@ -11,17 +11,14 @@ class RoundRect extends egret.DisplayObjectContainer{
 		private _content: number | string) 
 	{
 		super()
-		this.init()
-		return this
-	}
-
-	private init() {
 
 		this.x = this._x
 		this.y = this._y
 		this.addBg()
 		this.addTitle()
 		this.addContent()
+
+		return this
 	}
 
 	private addBg():void {
@@ -53,6 +50,7 @@ class RoundRect extends egret.DisplayObjectContainer{
 		content.text = this._content.toString()
 		content.size = 25 * 2
 		content.textColor = 0xffffff
+		console.log('content.measuredWidth', content.measuredWidth)
 		content.width = Math.max(content.measuredWidth, this._min_Width)
 		content.height = 36 * 2
 		content.y = 18 * 2
@@ -63,9 +61,19 @@ class RoundRect extends egret.DisplayObjectContainer{
 
 	public restart():void {
 		console.log('被触发啦')
-		this._content = 0
+		// this._content = 0
+		this._content = Main.score = 0
 		this.removeChild(this.getChildByName('content'))
 		this.addContent()
 	}
 
+	public setContent(content:number):void {
+		this.removeChild(this.getChildByName('content'))
+		this._content = content
+		this.addContent()
+	}
+	
+	public getContent():number | string {
+		return this._content
+	}
 }

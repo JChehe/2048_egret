@@ -11,6 +11,9 @@ interface GridInfo {
 }
 
 class Game extends egret.DisplayObjectContainer{
+
+	private static instance: Game
+
 	private _x:number = Main.paddingLeft
 	private _y:number = 150 * 2
 	private _sideLength: number = 282 * 2
@@ -24,7 +27,7 @@ class Game extends egret.DisplayObjectContainer{
 	private _mainBgColor:number = 0x92DAF2
 	private _gridWidth = (this._sideLength - (this._col + 1) * this._gridSpacing) / this._col
 	private _gridHeight = (this._sideLength - (this._row + 1) * this._gridSpacing) / this._row
-	private _girds:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
+	private _gridsDisplayContainer:egret.DisplayObjectContainer = new egret.DisplayObjectContainer()
 	private _gridInfo: GridInfo[] = [
         {
             "num": 2,
@@ -107,10 +110,12 @@ class Game extends egret.DisplayObjectContainer{
     ]
 
 	private _addGridAmount:number = 2
-	private grids: number[][] = []
+	private _grids: number[][] = []
+
 	public constructor() {
 		super()
 		
+		Game.instance = this
 
 		this.x = this._x
 		this.y = this._y
@@ -124,36 +129,45 @@ class Game extends egret.DisplayObjectContainer{
 		this.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onGameTouchBegin, this)
 
 		this.initGrids()
+		this._grids = [
+			[0,2,2,2],
+			[0,0,0,0],
+			[0,0,0,0],
+			[0,0,0,0]
+		]		
 		this.addGrids()
-		this.addChild(this._girds)
+		this.addChild(this._gridsDisplayContainer)
+		this.drawGrids()
+		
+		
+		// this.addEventListener(egret.Event.ENTER_FRAME, (evt: egret.Event) => {
+			
+		// }, this)
 
-		this.addEventListener(egret.Event.ENTER_FRAME, (evt: egret.Event) => {
-			for(let i = 0; i < this._row; i++) {
-				for(let j = 0; j < this._col; j++) {
-					if(this.grids[i][j] !== 0) {
-						this.drawGrid(i, j, this.grids[i][j])
-					}
-				}
-			}
-		}, this)
+			
+
 	}
 
 	public restart():void {
-
+		console.log('game restart')
 		this.initGrids()
-		this._girds.removeChildren()
+		this._gridsDisplayContainer.removeChildren()
 		this.addGrids()
+		this.drawGrids()
 
 	}
+
 	private initGrids():void {
 		// 初始所有格子为 0，即不显示
+		let index = 1
 		for(var i = 0; i < this._row; i++) {
-			this.grids[i] = []
+			this._grids[i] = []
 			for(var j = 0; j < this._col; j++) {
-				this.grids[i][j] = 0
+				this._grids[i][j] = 0
 			}
 		}
 	}
+
  	private drawGrid(row, col, num):void {
 		let inOneDimensionalArrIndex: number = row * this._col + col
 		let left: number = this.getLeftByIndex(inOneDimensionalArrIndex)
@@ -180,7 +194,154 @@ class Game extends egret.DisplayObjectContainer{
 		content.verticalAlign = egret.VerticalAlign.MIDDLE
 		
 		grid.addChild(content)
-		this._girds.addChild(grid)
+		this._gridsDisplayContainer.addChild(grid)
+	}
+
+	private leftMerge():void {
+		console.log('left')
+		let isMove:boolean = false, // include merge and move
+			_grids = this._grids
+
+		for(let r = 0; r < this._row; r++) {
+			for(let c = 0; c < this._col; c++) {
+				for(let nextC = c + 1; nextC < this._col; nextC++) {
+					
+					if(_grids[r][nextC] > 0) {
+						if(_grids[r][c] <= 0) {
+							_grids[r][c] = _grids[r][nextC]
+							_grids[r][nextC] = 0
+							nextC--
+							isMove = true
+							// break
+						} else if(_grids[r][c] === _grids[r][nextC]) {
+							_grids[r][c] *= 2
+							_grids[r][nextC] = 0
+							isMove = true
+							this.updateScore(_grids[r][c])
+							// break
+						}
+					}
+					if(r === 0) {
+						console.log('_gridp[0]', _grids[0])
+					}
+					// break;
+					
+				}
+			}
+		}
+
+		if(!this.checkGameOver()) {
+			if(isMove) {
+				// this.addGrids()
+				this.drawGrids()
+			}
+		} else {
+			this.gameOverHandle()
+		}
+	}
+
+	private rightMerge():void {
+		console.log('right')
+
+		let isMove:boolean = false,
+			_grids = this._grids
+		
+		for(let r = 0; r < this._row; r++) {
+			for(let c = this._col - 1; c >= 0; c--) {
+				for(let prevC = c - 1; prevC >= 0; prevC--) {
+					if(_grids[r][prevC] > 0) {
+						if(_grids[r][c] <= 0) {
+							_grids[r][c] = _grids[r][prevC]
+							_grids[r][prevC] = 0
+							prevC++
+							isMove = true
+						} else if(_grids[r][c] === _grids[r][prevC]) {
+							_grids[r][c] *= 2
+							_grids[r][prevC] = 0
+							isMove = true
+							this.updateScore(_grids[r][c])							
+						}
+					}
+				}
+			}
+		}
+		if(!this.checkGameOver()) {
+			if(isMove) {
+				this.addGrids()
+				this.drawGrids()
+			}
+		} else {
+			this.gameOverHandle()
+		}
+	}
+
+	private upMerge():void {
+		console.log('up')
+		let isMove:boolean = false,
+			_grids = this._grids
+
+		for(let c = 0; c < this._col; c++) {
+			for(let r = 0; r < this._row; r++) {
+				for(let nextR = r + 1; nextR < this._row; nextR++) {
+					if(_grids[nextR][c] > 0) {
+						if(_grids[r][c] <=  0) {
+							_grids[r][c] = _grids[nextR][c]
+							_grids[nextR][c] = 0
+							nextR--
+							isMove = true
+						} else if(_grids[r][c] === _grids[nextR][c]) {
+							_grids[r][c] *= 2
+							_grids[nextR][c] = 0
+							isMove = true
+							this.updateScore(_grids[r][c])
+						}
+					}
+				}
+			}
+		}
+		if(!this.checkGameOver()) {
+			if(isMove) {
+				this.addGrids()
+				this.drawGrids()
+			}
+		} else {
+			this.gameOverHandle()
+		}
+	}
+
+	private downMerge():void {
+		console.log('down')
+
+		let isMove:boolean = true,
+			_grids = this._grids
+
+		for(let c = 0; c < this._col; c++) {
+			for(let r = this._row - 1; r >= 0; r--) {
+				for(let prevR = r - 1; prevR >= 0; prevR--) {
+					if(_grids[prevR][c] > 0) {
+						if(_grids[r][c] <= 0) {
+							_grids[r][c] = _grids[prevR][c]
+							_grids[prevR][c] = 0
+							prevR++
+							isMove = true
+						} else if(_grids[r][c] === _grids[prevR][c]) {
+							_grids[r][c] *= 2
+							_grids[prevR][c] = 0
+							isMove = true
+							this.updateScore(_grids[r][c])
+						}
+					}
+				}
+			}
+		}
+		if(!this.checkGameOver()) {
+			if(isMove) {
+				this.addGrids()
+				this.drawGrids()
+			}
+		} else {
+			this.gameOverHandle()
+		}
 	}
 
 	private getGridInfoByNum(targetNum:number): GridInfo {
@@ -194,12 +355,50 @@ class Game extends egret.DisplayObjectContainer{
 		// 找不到就返回最后一个
 		return resultItem || this._gridInfo[this._gridInfo.length - 1]
 	}
+
+	private checkGameOver():boolean {
+		let _grids = this._grids,
+			isGameOver:boolean = true
+
+		for(let i = 0; i < this._row; i++) {
+			for(let j = 0; j < this._col; j++) {
+				let curGrid = _grids[i][j]
+				if(curGrid === 0
+					|| (i > 0 && curGrid === _grids[i - 1][j])
+					|| (j > 0 && curGrid === _grids[i][j - 1])
+					|| (i < this._col - 1 && curGrid === _grids[i + 1][j])
+					|| (j > this._row - 1 && curGrid === _grids[i][j + 1])) {
+					isGameOver = false
+					break
+				}
+			}
+			if(!isGameOver) break
+		}
+		
+		return isGameOver
+	}
+
+	private updateScore(increment:number):void {
+		Main.instance.updateScore(increment)
+	}
+
+	private gameOverHandle():void {
+		console.log('isGameOver')
+		Main.isGameOver = true
+		let gameOverEvent: GameOverEvent = new GameOverEvent(GameOverEvent.NAME)
+		
+		setTimeout(() => {
+			this.stage.dispatchEvent(gameOverEvent)
+		}, 1000)
+		
+	}
+
 	private addGrids():void {
 		// 找出所有为0的格子
 		let emptyGrids: (Coord)[] = []
 		for(let i = 0; i < this._row; i++) {
 			for(let j = 0; j < this._col; j++) {
-				if(this.grids[i][j] === 0) {
+				if(this._grids[i][j] === 0) {
 					emptyGrids.push({
 						x: i,
 						y: j
@@ -222,9 +421,20 @@ class Game extends egret.DisplayObjectContainer{
 		for(let i = 0; i < finalNeedToAddGridsCoord.length; i++) {
 			let x: number = finalNeedToAddGridsCoord[i].x
 			let y: number = finalNeedToAddGridsCoord[i].y
-			this.grids[x][y] = this.getNewNumber()
+			this._grids[x][y] = this.getNewNumber()
 		}
 
+	}
+
+	private drawGrids():void {
+		this._gridsDisplayContainer.removeChildren()
+		for(let i = 0; i < this._row; i++) {
+			for(let j = 0; j < this._col; j++) {
+				if(this._grids[i][j] !== 0) {
+					this.drawGrid(i, j, this._grids[i][j])
+				}
+			}
+		}
 	}
 	
 	/**
@@ -237,7 +447,7 @@ class Game extends egret.DisplayObjectContainer{
 	
 	private getNewNumber():number {
 		let probability:number = Math.random()
-		return probability < 0.8 ? 2 : 4
+		return probability < 0.9 ? 2 : 4
 	}
 
 	private addMainBg():void {
@@ -290,6 +500,7 @@ class Game extends egret.DisplayObjectContainer{
 		target.touchY = event.stageY
 		this.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onGameTouchMove, this)
 	}
+
 	private onGameTouchMove(event: egret.TouchEvent):void {
 		let target = event.currentTarget
 		let deltaX: number = event.stageX - target.touchX
@@ -303,20 +514,23 @@ class Game extends egret.DisplayObjectContainer{
 		if(Math.abs(deltaX) > Math.abs(deltaY)) {
 			if(deltaX < 0) {
 				// left
-
+				this.leftMerge()
 			} else {
 				// right
+				this.rightMerge()
 			}
 		} else {
 			if(deltaY < 0) {
 				// up
-
+				this.upMerge()
 			} else {
 				// down
+				this.downMerge()
 			}
 		}
 		this.removeEventListener(egret.TouchEvent.TOUCH_MOVE, this.onGameTouchMove, this)
 	}
+
 	private static onKeyup(event):void {
 		let key: string = event.key
 		switch(key) {
@@ -324,21 +538,27 @@ class Game extends egret.DisplayObjectContainer{
 			case 'A':
 			case 'ArrowLeft': 
 				// left
+				Game.instance.leftMerge()
 				break;
 			case 'd':
 			case 'D':
 			case 'ArrowRight':
 				// right
+				Game.instance.rightMerge()
+				
 				break;
 			case 'w':
 			case 'W':
 			case 'ArrowUp':
 				// up
+				Game.instance.upMerge()
+				
 				break;
 			case 's':
 			case 'S':
 			case 'ArrowDown':
 				// down
+				Game.instance.downMerge()
 				break;
 		}
 	}

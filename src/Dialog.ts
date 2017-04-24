@@ -1,7 +1,7 @@
 class Dialog extends egret.DisplayObjectContainer{
 
-	private restartBtn: RestartBtn = new RestartBtn(119 * 2, 423 * 2, '再玩一次')
-	
+	private restartBtn: RestartBtn = new RestartBtn(127 * 2, 423 * 2, '再玩一次')
+	private maskDisplayObject: egret.Shape
 	public constructor() {
 		super()
 		this.x = 0
@@ -13,9 +13,13 @@ class Dialog extends egret.DisplayObjectContainer{
 		this.addText()
 		this.addCry()
 	}
-
+	public triggerMaskTap():void {
+		this.dispatchEventWith(egret.TouchEvent.TOUCH_TAP)
+	}
 	private addMask():void {
 		let mask:egret.Shape = new egret.Shape()
+		this.maskDisplayObject = mask
+		// mask.name = 'mask'
 		mask.graphics.beginFill(0xffffff, .8)
 		mask.graphics.drawRect(0, 0, Main.stageW, Main.stageH)
 		mask.graphics.endFill()
@@ -23,7 +27,8 @@ class Dialog extends egret.DisplayObjectContainer{
 		this.touchEnabled = true
 		// 取消冒泡
 		this.restartBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.stopRestartBtnPropagation, this)
-		this.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onMaskTouchTap, this,false)
+		// 事件只能绑定在 显示容器 上
+		this.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onMaskTouchTap, this, false)
 		this.addChild(mask)
 	}
 	private stopRestartBtnPropagation(event: egret.TouchEvent):void {
@@ -31,16 +36,18 @@ class Dialog extends egret.DisplayObjectContainer{
 	}
 	private onMaskTouchTap(event: egret.TouchEvent): void {
 		// 关闭当前 图层
-		// console.log()
+		console.log('mask 被触发啦')
 		if(this.parent) {
 			this.parent.removeChild(this)
+			// removeChild 并不会
+			Main.instance.setDialogNull()
 		}
 	}
 
 	private addText():void {
 		let text: egret.TextField = new egret.TextField()
 
-		text.text = 'Game Over'
+		text.text = 'Game Over !'
 		text.size = 48 * 2
 		text.textColor = Main.FONT_COLOR
 		text.width = Main.stageW

@@ -38,13 +38,10 @@ var Main = (function (_super) {
     __extends(Main, _super);
     function Main() {
         var _this = _super.call(this) || this;
+        Main.instance = _this;
         _this.addEventListener(egret.Event.ADDED_TO_STAGE, _this.onAddToStage, _this);
         return _this;
     }
-    Main.prototype.restart = function () {
-        this.game.restart();
-        // this.scorePanel.
-    };
     Main.prototype.onAddToStage = function (event) {
         //设置加载进度界面
         //Config to load process interface
@@ -130,15 +127,35 @@ var Main = (function (_super) {
         this.stage.addChild(this.restartBtn);
         this.game = new Game();
         this.stage.addChild(this.game);
-        this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this); // this 参数用于指定回调函数内的this
+        // this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this) // this 参数用于指定回调函数内的this
+        this.stage.addEventListener(GameOverEvent.NAME, this.gameOverHandle, this);
         if (Main.isGameOver) {
             this.dialog = new Dialog();
             this.stage.addChild(this.dialog);
         }
     };
-    Main.prototype.restartHandle = function () {
+    Main.prototype.restart = function () {
         this.scorePanel.restart();
         this.game.restart();
+        this.dialog.triggerMaskTap();
+        console.log('触发game restart');
+    };
+    Main.prototype.gameOverHandle = function () {
+        console.log('Game Over Event');
+        if (!this.dialog) {
+            this.dialog = new Dialog();
+            this.stage.addChild(this.dialog);
+        }
+    };
+    Main.prototype.setDialogNull = function () {
+        this.dialog = null;
+    };
+    Main.prototype.updateScore = function (increment) {
+        Main.score += increment;
+        if (Main.score > this.bestPanel.getContent()) {
+            this.bestPanel.setContent(Main.score);
+        }
+        this.scorePanel.setContent(Main.score);
     };
     return Main;
 }(egret.DisplayObjectContainer));

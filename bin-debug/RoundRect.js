@@ -20,16 +20,13 @@ var RoundRect = (function (_super) {
         _this._min_Width = 60 * 2;
         _this._height = 55 * 2;
         _this._radius = 3 * 2;
-        _this.init();
+        _this.x = _this._x;
+        _this.y = _this._y;
+        _this.addBg();
+        _this.addTitle();
+        _this.addContent();
         return _this;
     }
-    RoundRect.prototype.init = function () {
-        this.x = this._x;
-        this.y = this._y;
-        this.addBg();
-        this.addTitle();
-        this.addContent();
-    };
     RoundRect.prototype.addBg = function () {
         var bg = new egret.Shape();
         bg.graphics.beginFill(this._bg_color);
@@ -54,6 +51,7 @@ var RoundRect = (function (_super) {
         content.text = this._content.toString();
         content.size = 25 * 2;
         content.textColor = 0xffffff;
+        console.log('content.measuredWidth', content.measuredWidth);
         content.width = Math.max(content.measuredWidth, this._min_Width);
         content.height = 36 * 2;
         content.y = 18 * 2;
@@ -63,9 +61,18 @@ var RoundRect = (function (_super) {
     };
     RoundRect.prototype.restart = function () {
         console.log('被触发啦');
-        this._content = 0;
+        // this._content = 0
+        this._content = Main.score = 0;
         this.removeChild(this.getChildByName('content'));
         this.addContent();
+    };
+    RoundRect.prototype.setContent = function (content) {
+        this.removeChild(this.getChildByName('content'));
+        this._content = content;
+        this.addContent();
+    };
+    RoundRect.prototype.getContent = function () {
+        return this._content;
     };
     return RoundRect;
 }(egret.DisplayObjectContainer));

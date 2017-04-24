@@ -23,7 +23,7 @@ var Game = (function (_super) {
         _this._mainBgColor = 0x92DAF2;
         _this._gridWidth = (_this._sideLength - (_this._col + 1) * _this._gridSpacing) / _this._col;
         _this._gridHeight = (_this._sideLength - (_this._row + 1) * _this._gridSpacing) / _this._row;
-        _this._girds = new egret.DisplayObjectContainer();
+        _this._gridsDisplayContainer = new egret.DisplayObjectContainer();
         _this._gridInfo = [
             {
                 "num": 2,
@@ -105,7 +105,8 @@ var Game = (function (_super) {
             }
         ];
         _this._addGridAmount = 2;
-        _this.grids = [];
+        _this._grids = [];
+        Game.instance = _this;
         _this.x = _this._x;
         _this.y = _this._y;
         _this.addMainBg();
@@ -114,38 +115,40 @@ var Game = (function (_super) {
         _this.touchEnabled = true;
         _this.addEventListener(egret.TouchEvent.TOUCH_BEGIN, _this.onGameTouchBegin, _this);
         _this.initGrids();
+        _this._grids = [
+            [0, 2, 2, 2],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
         _this.addGrids();
-        _this.addChild(_this._girds);
-        _this.addEventListener(egret.Event.ENTER_FRAME, function (evt) {
-            for (var i = 0; i < _this._row; i++) {
-                for (var j = 0; j < _this._col; j++) {
-                    if (_this.grids[i][j] !== 0) {
-                        _this.drawGrid(i, j, _this.grids[i][j]);
-                    }
-                }
-            }
-            console.log('循环');
-        }, _this);
+        _this.addChild(_this._gridsDisplayContainer);
+        _this.drawGrids();
         return _this;
+        // this.addEventListener(egret.Event.ENTER_FRAME, (evt: egret.Event) => {
+        // }, this)
     }
     Game.prototype.restart = function () {
+        console.log('game restart');
         this.initGrids();
-        this._girds.removeChildren();
+        this._gridsDisplayContainer.removeChildren();
         this.addGrids();
+        this.drawGrids();
     };
     Game.prototype.initGrids = function () {
         // 初始所有格子为 0，即不显示
+        var index = 1;
         for (var i = 0; i < this._row; i++) {
-            this.grids[i] = [];
+            this._grids[i] = [];
             for (var j = 0; j < this._col; j++) {
-                this.grids[i][j] = 0;
+                this._grids[i][j] = 0;
             }
         }
     };
     Game.prototype.drawGrid = function (row, col, num) {
-        var indexInOneDimensionalArr = row * this._col + col;
-        var left = this.getLeftByIndex(indexInOneDimensionalArr);
-        var top = this.getTopByIndex(indexInOneDimensionalArr);
+        var inOneDimensionalArrIndex = row * this._col + col;
+        var left = this.getLeftByIndex(inOneDimensionalArrIndex);
+        var top = this.getTopByIndex(inOneDimensionalArrIndex);
         var gridInfo = this.getGridInfoByNum(num);
         var grid = new egret.Sprite;
         grid.name = "grid-" + row + "-" + col;
@@ -163,7 +166,143 @@ var Game = (function (_super) {
         content.textAlign = egret.HorizontalAlign.CENTER;
         content.verticalAlign = egret.VerticalAlign.MIDDLE;
         grid.addChild(content);
-        this._girds.addChild(grid);
+        this._gridsDisplayContainer.addChild(grid);
+    };
+    Game.prototype.leftMerge = function () {
+        console.log('left');
+        var isMove = false, // include merge and move
+        _grids = this._grids;
+        for (var r = 0; r < this._row; r++) {
+            for (var c = 0; c < this._col; c++) {
+                for (var nextC = c + 1; nextC < this._col; nextC++) {
+                    if (_grids[r][nextC] > 0) {
+                        if (_grids[r][c] <= 0) {
+                            _grids[r][c] = _grids[r][nextC];
+                            _grids[r][nextC] = 0;
+                            nextC--;
+                            isMove = true;
+                        }
+                        else if (_grids[r][c] === _grids[r][nextC]) {
+                            _grids[r][c] *= 2;
+                            _grids[r][nextC] = 0;
+                            isMove = true;
+                            this.updateScore(_grids[r][c]);
+                        }
+                    }
+                    if (r === 0) {
+                        console.log('_gridp[0]', _grids[0]);
+                    }
+                }
+            }
+        }
+        if (!this.checkGameOver()) {
+            if (isMove) {
+                // this.addGrids()
+                this.drawGrids();
+            }
+        }
+        else {
+            this.gameOverHandle();
+        }
+    };
+    Game.prototype.rightMerge = function () {
+        console.log('right');
+        var isMove = false, _grids = this._grids;
+        for (var r = 0; r < this._row; r++) {
+            for (var c = this._col - 1; c >= 0; c--) {
+                for (var prevC = c - 1; prevC >= 0; prevC--) {
+                    if (_grids[r][prevC] > 0) {
+                        if (_grids[r][c] <= 0) {
+                            _grids[r][c] = _grids[r][prevC];
+                            _grids[r][prevC] = 0;
+                            prevC++;
+                            isMove = true;
+                        }
+                        else if (_grids[r][c] === _grids[r][prevC]) {
+                            _grids[r][c] *= 2;
+                            _grids[r][prevC] = 0;
+                            isMove = true;
+                            this.updateScore(_grids[r][c]);
+                        }
+                    }
+                }
+            }
+        }
+        if (!this.checkGameOver()) {
+            if (isMove) {
+                this.addGrids();
+                this.drawGrids();
+            }
+        }
+        else {
+            this.gameOverHandle();
+        }
+    };
+    Game.prototype.upMerge = function () {
+        console.log('up');
+        var isMove = false, _grids = this._grids;
+        for (var c = 0; c < this._col; c++) {
+            for (var r = 0; r < this._row; r++) {
+                for (var nextR = r + 1; nextR < this._row; nextR++) {
+                    if (_grids[nextR][c] > 0) {
+                        if (_grids[r][c] <= 0) {
+                            _grids[r][c] = _grids[nextR][c];
+                            _grids[nextR][c] = 0;
+                            nextR--;
+                            isMove = true;
+                        }
+                        else if (_grids[r][c] === _grids[nextR][c]) {
+                            _grids[r][c] *= 2;
+                            _grids[nextR][c] = 0;
+                            isMove = true;
+                            this.updateScore(_grids[r][c]);
+                        }
+                    }
+                }
+            }
+        }
+        if (!this.checkGameOver()) {
+            if (isMove) {
+                this.addGrids();
+                this.drawGrids();
+            }
+        }
+        else {
+            this.gameOverHandle();
+        }
+    };
+    Game.prototype.downMerge = function () {
+        console.log('down');
+        var isMove = true, _grids = this._grids;
+        for (var c = 0; c < this._col; c++) {
+            for (var r = this._row - 1; r >= 0; r--) {
+                for (var prevR = r - 1; prevR >= 0; prevR--) {
+                    if (_grids[prevR][c] > 0) {
+                        if (_grids[r][c] <= 0) {
+                            _grids[r][c] = _grids[prevR][c];
+                            _grids[prevR][c] = 0;
+                            prevR++;
+                            isMove = true;
+                        }
+                        else if (_grids[r][c] === _grids[prevR][c]) {
+                            _grids[r][c] *= 2;
+                            _grids[prevR][c] = 0;
+                            isMove = true;
+                            this.updateScore(_grids[r][c]);
+                        }
+                    }
+                }
+            }
+        }
+        if (!this.checkGameOver()) {
+            if (isMove) {
+                this.addGrids();
+                this.drawGrids();
+            }
+        }
+        else {
+            this.gameOverHandle();
+        }
     };
     Game.prototype.getGridInfoByNum = function (targetNum) {
         var resultItem;
@@ -175,12 +314,43 @@ var Game = (function (_super) {
         // 找不到就返回最后一个
         return resultItem || this._gridInfo[this._gridInfo.length - 1];
     };
+    Game.prototype.checkGameOver = function () {
+        var _grids = this._grids, isGameOver = true;
+        for (var i = 0; i < this._row; i++) {
+            for (var j = 0; j < this._col; j++) {
+                var curGrid = _grids[i][j];
+                if (curGrid === 0
+                    || (i > 0 && curGrid === _grids[i - 1][j])
+                    || (j > 0 && curGrid === _grids[i][j - 1])
+                    || (i < this._col - 1 && curGrid === _grids[i + 1][j])
+                    || (j > this._row - 1 && curGrid === _grids[i][j + 1])) {
+                    isGameOver = false;
+                    break;
+                }
+            }
+            if (!isGameOver)
+                break;
+        }
+        return isGameOver;
+    };
+    Game.prototype.updateScore = function (increment) {
+        Main.instance.updateScore(increment);
+    };
+    Game.prototype.gameOverHandle = function () {
+        var _this = this;
+        console.log('isGameOver');
+        Main.isGameOver = true;
+        var gameOverEvent = new GameOverEvent(GameOverEvent.NAME);
+        setTimeout(function () {
+            _this.stage.dispatchEvent(gameOverEvent);
+        }, 1000);
+    };
     Game.prototype.addGrids = function () {
         // 找出所有为0的格子
         var emptyGrids = [];
         for (var i = 0; i < this._row; i++) {
             for (var j = 0; j < this._col; j++) {
-                if (this.grids[i][j] === 0) {
+                if (this._grids[i][j] === 0) {
                     emptyGrids.push({
                         x: i,
                         y: j
@@ -197,11 +367,19 @@ var Game = (function (_super) {
             emptyGrids.splice(index, 1);
         }
         for (var i = 0; i < finalNeedToAddGridsCoord.length; i++) {
-            // let x = this.getRowByIndex(finalNeedToAddGridsIndexes[i])
-            // let y = this.getColByIndex(finalNeedToAddGridsIndexes[i])
             var x = finalNeedToAddGridsCoord[i].x;
             var y = finalNeedToAddGridsCoord[i].y;
-            this.grids[x][y] = this.getNewNumber();
+            this._grids[x][y] = this.getNewNumber();
+        }
+    };
+    Game.prototype.drawGrids = function () {
+        this._gridsDisplayContainer.removeChildren();
+        for (var i = 0; i < this._row; i++) {
+            for (var j = 0; j < this._col; j++) {
+                if (this._grids[i][j] !== 0) {
+                    this.drawGrid(i, j, this._grids[i][j]);
+                }
+            }
         }
     };
     /**
@@ -213,7 +391,7 @@ var Game = (function (_super) {
     };
     Game.prototype.getNewNumber = function () {
         var probability = Math.random();
-        return probability < 0.8 ? 2 : 4;
+        return probability < 0.9 ? 2 : 4;
     };
     Game.prototype.addMainBg = function () {
         var mainBg = new egret.Shape();
@@ -263,14 +441,22 @@ var Game = (function (_super) {
         }
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             if (deltaX < 0) {
+                // left
+                this.leftMerge();
             }
             else {
+                // right
+                this.rightMerge();
             }
         }
         else {
             if (deltaY < 0) {
+                // up
+                this.upMerge();
             }
             else {
+                // down
+                this.downMerge();
             }
         }
         this.removeEventListener(egret.TouchEvent.TOUCH_MOVE, this.onGameTouchMove, this);
@@ -282,21 +468,25 @@ var Game = (function (_super) {
             case 'A':
             case 'ArrowLeft':
                 // left
+                Game.instance.leftMerge();
                 break;
             case 'd':
             case 'D':
             case 'ArrowRight':
                 // right
+                Game.instance.rightMerge();
                 break;
             case 'w':
             case 'W':
             case 'ArrowUp':
                 // up
+                Game.instance.upMerge();
                 break;
             case 's':
             case 'S':
             case 'ArrowDown':
                 // down
+                Game.instance.downMerge();
                 break;
         }
     };

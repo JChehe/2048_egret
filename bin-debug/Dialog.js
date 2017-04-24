@@ -10,7 +10,7 @@ var Dialog = (function (_super) {
     __extends(Dialog, _super);
     function Dialog() {
         var _this = _super.call(this) || this;
-        _this.restartBtn = new RestartBtn(119 * 2, 423 * 2, '再玩一次');
+        _this.restartBtn = new RestartBtn(127 * 2, 423 * 2, '再玩一次');
         _this.x = 0;
         _this.y = 0;
         _this.width = Main.stageW;
@@ -21,14 +21,20 @@ var Dialog = (function (_super) {
         _this.addCry();
         return _this;
     }
+    Dialog.prototype.triggerMaskTap = function () {
+        this.dispatchEventWith(egret.TouchEvent.TOUCH_TAP);
+    };
     Dialog.prototype.addMask = function () {
         var mask = new egret.Shape();
+        this.maskDisplayObject = mask;
+        // mask.name = 'mask'
         mask.graphics.beginFill(0xffffff, .8);
         mask.graphics.drawRect(0, 0, Main.stageW, Main.stageH);
         mask.graphics.endFill();
         this.touchEnabled = true;
         // 取消冒泡
         this.restartBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.stopRestartBtnPropagation, this);
+        // 事件只能绑定在 显示容器 上
         this.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onMaskTouchTap, this, false);
         this.addChild(mask);
     };
@@ -37,14 +43,16 @@ var Dialog = (function (_super) {
     };
     Dialog.prototype.onMaskTouchTap = function (event) {
         // 关闭当前 图层
-        // console.log()
+        console.log('mask 被触发啦');
         if (this.parent) {
             this.parent.removeChild(this);
+            // removeChild 并不会
+            Main.instance.setDialogNull();
         }
     };
     Dialog.prototype.addText = function () {
         var text = new egret.TextField();
-        text.text = 'Game Over';
+        text.text = 'Game Over !';
         text.size = 48 * 2;
         text.textColor = Main.FONT_COLOR;
         text.width = Main.stageW;
