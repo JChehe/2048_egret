@@ -119,9 +119,12 @@ var Main = (function (_super) {
         // 按照游戏的层级关系进行添加元素，否则会盖住
         this.gameOther = new GameOther();
         this.stage.addChild(this.gameOther);
-        this.scorePanel = new RoundRect(199 * 2, Main.paddingTop, 'SCORE', 88);
+        this.scorePanel = new RoundRect(199 * 2, Main.paddingTop, 'SCORE', 0);
         this.stage.addChild(this.scorePanel);
-        this.bestPanel = new RoundRect(269 * 2, Main.paddingTop, 'BEST', 0);
+        var best = JSON.parse(egret.localStorage.getItem('best'));
+        if (best === undefined || best === null)
+            best = 0;
+        this.bestPanel = new RoundRect(269 * 2, Main.paddingTop, 'BEST', best);
         this.stage.addChild(this.bestPanel);
         this.restartBtn = new RestartBtn(210 * 2, 85 * 2);
         this.stage.addChild(this.restartBtn);
@@ -130,30 +133,32 @@ var Main = (function (_super) {
         // this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this) // this 参数用于指定回调函数内的this
         this.stage.addEventListener(GameOverEvent.NAME, this.gameOverHandle, this);
         if (Main.isGameOver) {
-            this.dialog = new Dialog();
-            this.stage.addChild(this.dialog);
+            this.gameOverDialog = new GameOverDialog();
+            this.stage.addChild(this.gameOverDialog);
         }
     };
     Main.prototype.restart = function () {
         this.scorePanel.restart();
         this.game.restart();
-        this.dialog.triggerMaskTap();
+        if (this.gameOverDialog)
+            this.gameOverDialog.triggerMaskTap();
         console.log('触发game restart');
     };
     Main.prototype.gameOverHandle = function () {
         console.log('Game Over Event');
-        if (!this.dialog) {
-            this.dialog = new Dialog();
-            this.stage.addChild(this.dialog);
+        if (!this.gameOverDialog) {
+            this.gameOverDialog = new GameOverDialog();
+            this.stage.addChild(this.gameOverDialog);
         }
     };
-    Main.prototype.setDialogNull = function () {
-        this.dialog = null;
+    Main.prototype.setGameOverDialogNull = function () {
+        this.gameOverDialog = null;
     };
     Main.prototype.updateScore = function (increment) {
         Main.score += increment;
         if (Main.score > this.bestPanel.getContent()) {
             this.bestPanel.setContent(Main.score);
+            egret.localStorage.setItem('best', Main.score.toString());
         }
         this.scorePanel.setContent(Main.score);
     };

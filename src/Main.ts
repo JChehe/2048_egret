@@ -38,7 +38,7 @@ class Main extends egret.DisplayObjectContainer {
     private scorePanel: RoundRect
     private bestPanel: RoundRect
     private restartBtn: RestartBtn
-    private dialog: Dialog
+    private gameOverDialog: GameOverDialog
     private gameOther: GameOther
     private game: Game
 
@@ -150,10 +150,12 @@ class Main extends egret.DisplayObjectContainer {
         this.gameOther = new GameOther()
         this.stage.addChild(this.gameOther)
 
-        this.scorePanel = new RoundRect(199 * 2, Main.paddingTop, 'SCORE', 88);
+        this.scorePanel = new RoundRect(199 * 2, Main.paddingTop, 'SCORE', 0);
         this.stage.addChild(this.scorePanel);
 
-        this.bestPanel = new RoundRect(269 * 2, Main.paddingTop, 'BEST', 0);
+        let best = JSON.parse(egret.localStorage.getItem('best'))
+        if(best === undefined || best === null) best = 0
+        this.bestPanel = new RoundRect(269 * 2, Main.paddingTop, 'BEST', best);
         this.stage.addChild(this.bestPanel);
 
         this.restartBtn = new RestartBtn(210 * 2, 85 * 2)
@@ -165,27 +167,28 @@ class Main extends egret.DisplayObjectContainer {
         // this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this) // this 参数用于指定回调函数内的this
         this.stage.addEventListener(GameOverEvent.NAME, this.gameOverHandle, this)
         if(Main.isGameOver) {
-            this.dialog = new Dialog()
-            this.stage.addChild(this.dialog)
+            this.gameOverDialog = new GameOverDialog()
+            this.stage.addChild(this.gameOverDialog)
         }
     }
 
     public restart():void {
         this.scorePanel.restart()
         this.game.restart()
-        this.dialog.triggerMaskTap()
+        if(this.gameOverDialog)
+            this.gameOverDialog.triggerMaskTap()
         console.log('触发game restart')
     }
 
     private gameOverHandle():void {
         console.log('Game Over Event')
-        if(!this.dialog) {
-            this.dialog = new Dialog()
-            this.stage.addChild(this.dialog)
+        if(!this.gameOverDialog) {
+            this.gameOverDialog = new GameOverDialog()
+            this.stage.addChild(this.gameOverDialog)
         }
     }
-    public setDialogNull():void {
-        this.dialog = null
+    public setGameOverDialogNull():void {
+        this.gameOverDialog = null
     }
 
     public updateScore(increment:number):void {
@@ -193,11 +196,10 @@ class Main extends egret.DisplayObjectContainer {
 
         if(Main.score > this.bestPanel.getContent()) {
             this.bestPanel.setContent(Main.score)
+            egret.localStorage.setItem('best', Main.score.toString())
         }
         this.scorePanel.setContent(Main.score)
     }
-
-    
 }
 
 

@@ -1,4 +1,4 @@
-class Dialog extends egret.DisplayObjectContainer{
+class GameOverDialog extends egret.DisplayObjectContainer{
 
 	private restartBtn: RestartBtn = new RestartBtn(127 * 2, 423 * 2, '再玩一次')
 	private maskDisplayObject: egret.Shape
@@ -40,7 +40,7 @@ class Dialog extends egret.DisplayObjectContainer{
 		if(this.parent) {
 			this.parent.removeChild(this)
 			// removeChild 并不会
-			Main.instance.setDialogNull()
+			Main.instance.setGameOverDialogNull()
 		}
 	}
 

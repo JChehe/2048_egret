@@ -6,9 +6,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var Dialog = (function (_super) {
-    __extends(Dialog, _super);
-    function Dialog() {
+var GameOverDialog = (function (_super) {
+    __extends(GameOverDialog, _super);
+    function GameOverDialog() {
         var _this = _super.call(this) || this;
         _this.restartBtn = new RestartBtn(127 * 2, 423 * 2, '再玩一次');
         _this.x = 0;
@@ -21,10 +21,10 @@ var Dialog = (function (_super) {
         _this.addCry();
         return _this;
     }
-    Dialog.prototype.triggerMaskTap = function () {
+    GameOverDialog.prototype.triggerMaskTap = function () {
         this.dispatchEventWith(egret.TouchEvent.TOUCH_TAP);
     };
-    Dialog.prototype.addMask = function () {
+    GameOverDialog.prototype.addMask = function () {
         var mask = new egret.Shape();
         this.maskDisplayObject = mask;
         // mask.name = 'mask'
@@ -38,19 +38,19 @@ var Dialog = (function (_super) {
         this.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onMaskTouchTap, this, false);
         this.addChild(mask);
     };
-    Dialog.prototype.stopRestartBtnPropagation = function (event) {
+    GameOverDialog.prototype.stopRestartBtnPropagation = function (event) {
         event.stopPropagation();
     };
-    Dialog.prototype.onMaskTouchTap = function (event) {
+    GameOverDialog.prototype.onMaskTouchTap = function (event) {
         // 关闭当前 图层
         console.log('mask 被触发啦');
         if (this.parent) {
             this.parent.removeChild(this);
             // removeChild 并不会
-            Main.instance.setDialogNull();
+            Main.instance.setGameOverDialogNull();
         }
     };
-    Dialog.prototype.addText = function () {
+    GameOverDialog.prototype.addText = function () {
         var text = new egret.TextField();
         text.text = 'Game Over !';
         text.size = 48 * 2;
@@ -61,7 +61,7 @@ var Dialog = (function (_super) {
         text.rotation = -6;
         this.addChild(text);
     };
-    Dialog.prototype.addCry = function () {
+    GameOverDialog.prototype.addCry = function () {
         var img = new egret.Bitmap();
         img.texture = RES.getRes('cry_png');
         img.width = 101 * 2;
@@ -70,7 +70,7 @@ var Dialog = (function (_super) {
         img.x = 138 * 2;
         this.addChild(img);
     };
-    return Dialog;
+    return GameOverDialog;
 }(egret.DisplayObjectContainer));
-__reflect(Dialog.prototype, "Dialog");
-//# sourceMappingURL=Dialog.js.map
+__reflect(GameOverDialog.prototype, "GameOverDialog");
+//# sourceMappingURL=GameOverDialog.js.map

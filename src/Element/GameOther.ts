@@ -1,3 +1,5 @@
+// 游戏名字、口号、游戏背景、玩法、版权
+
 class GameOther extends egret.DisplayObjectContainer {
 	public constructor() {
 		super()

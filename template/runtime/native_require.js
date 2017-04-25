@@ -8,15 +8,15 @@ var game_file_list = [
 	"libs/modules/res/res.js",
 	"libs/modules/tween/tween.js",
 	"polyfill/promise.js",
-	"bin-debug/Dialog.js",
+	"bin-debug/Element/GameOther.js",
+	"bin-debug/Element/GameOverDialog.js",
+	"bin-debug/Element/LoadingUI.js",
+	"bin-debug/Element/RestartBtn.js",
+	"bin-debug/Element/RoundRect.js",
+	"bin-debug/Event/GameOverEvent.js",
+	"bin-debug/Event/RestartEvent.js",
 	"bin-debug/Game.js",
-	"bin-debug/GameOther.js",
-	"bin-debug/GameOverEvent.js",
-	"bin-debug/LoadingUI.js",
 	"bin-debug/Main.js",
-	"bin-debug/RestartBtn.js",
-	"bin-debug/RestartEvent.js",
-	"bin-debug/RoundRect.js",
 	//----auto game_file_list end----
 ];
 

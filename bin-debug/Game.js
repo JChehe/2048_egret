@@ -115,12 +115,13 @@ var Game = (function (_super) {
         _this.touchEnabled = true;
         _this.addEventListener(egret.TouchEvent.TOUCH_BEGIN, _this.onGameTouchBegin, _this);
         _this.initGrids();
-        _this._grids = [
-            [0, 2, 2, 2],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]
-        ];
+        /* test data
+        this._grids = [
+            [4,2,2,0],
+            [2,2,4,0],
+            [2,0,2,2],
+            [2,2,2,2]
+        ]	*/
         _this.addGrids();
         _this.addChild(_this._gridsDisplayContainer);
         _this.drawGrids();
@@ -130,6 +131,7 @@ var Game = (function (_super) {
     }
     Game.prototype.restart = function () {
         console.log('game restart');
+        Main.isGameOver = false;
         this.initGrids();
         this._gridsDisplayContainer.removeChildren();
         this.addGrids();
@@ -168,135 +170,124 @@ var Game = (function (_super) {
         grid.addChild(content);
         this._gridsDisplayContainer.addChild(grid);
     };
-    Game.prototype.leftMerge = function () {
+    Game.prototype.moveToLeft = function () {
         console.log('left');
         var isMove = false, // include merge and move
-        _grids = this._grids;
+        _grids = this._grids, mergeTags = {}, increaseScore = 0;
         for (var r = 0; r < this._row; r++) {
-            for (var c = 0; c < this._col; c++) {
-                for (var nextC = c + 1; nextC < this._col; nextC++) {
-                    if (_grids[r][nextC] > 0) {
-                        if (_grids[r][c] <= 0) {
-                            _grids[r][c] = _grids[r][nextC];
-                            _grids[r][nextC] = 0;
-                            nextC--;
-                            isMove = true;
-                        }
-                        else if (_grids[r][c] === _grids[r][nextC]) {
-                            _grids[r][c] *= 2;
-                            _grids[r][nextC] = 0;
-                            isMove = true;
-                            this.updateScore(_grids[r][c]);
-                        }
-                    }
-                    if (r === 0) {
-                        console.log('_gridp[0]', _grids[0]);
-                    }
+            for (var c = 1; c < this._col; c++) {
+                console.log('_grids[' + r + '][' + (c - 1) + ']', _grids[r][c - 1]);
+                if (_grids[r][c] === 0)
+                    continue;
+                if (_grids[r][c - 1] === 0) {
+                    _grids[r][c - 1] = _grids[r][c];
+                    _grids[r][c] = 0;
+                    c = 0;
+                    isMove = true;
+                }
+                else if (_grids[r][c - 1] === _grids[r][c] && !(mergeTags['' + r + (c - 1)] || mergeTags['' + r + c])) {
+                    increaseScore = _grids[r][c - 1] *= 2;
+                    _grids[r][c] = 0;
+                    mergeTags['' + r + (c - 1)] = true;
+                    c = 0;
+                    isMove = true;
                 }
             }
         }
-        if (!this.checkGameOver()) {
-            if (isMove) {
-                // this.addGrids()
-                this.drawGrids();
-            }
-        }
-        else {
-            this.gameOverHandle();
-        }
+        console.log('mergeTags', mergeTags);
+        mergeTags = null;
+        this.afterMoving(isMove, increaseScore);
     };
-    Game.prototype.rightMerge = function () {
+    Game.prototype.moveToRight = function () {
         console.log('right');
-        var isMove = false, _grids = this._grids;
+        var isMove = false, // include merge and move
+        _grids = this._grids, mergeTags = {}, increaseScore = 0;
         for (var r = 0; r < this._row; r++) {
-            for (var c = this._col - 1; c >= 0; c--) {
-                for (var prevC = c - 1; prevC >= 0; prevC--) {
-                    if (_grids[r][prevC] > 0) {
-                        if (_grids[r][c] <= 0) {
-                            _grids[r][c] = _grids[r][prevC];
-                            _grids[r][prevC] = 0;
-                            prevC++;
-                            isMove = true;
-                        }
-                        else if (_grids[r][c] === _grids[r][prevC]) {
-                            _grids[r][c] *= 2;
-                            _grids[r][prevC] = 0;
-                            isMove = true;
-                            this.updateScore(_grids[r][c]);
-                        }
-                    }
+            for (var c = this._col - 2; c >= 0; c--) {
+                if (_grids[r][c] === 0)
+                    continue;
+                // console.log('_grids[' + r + ']['+ (c + 1) +']', _grids[r][c + 1])
+                if (_grids[r][c + 1] === 0) {
+                    _grids[r][c + 1] = _grids[r][c];
+                    _grids[r][c] = 0;
+                    c = this._col - 1;
+                    isMove = true;
+                }
+                else if (_grids[r][c + 1] === _grids[r][c] && !(mergeTags['' + r + (c + 1)] || mergeTags['' + r + c])) {
+                    increaseScore = _grids[r][c + 1] *= 2;
+                    _grids[r][c] = 0;
+                    mergeTags['' + r + (c + 1)] = true;
+                    c = this._col - 1;
+                    isMove = true;
                 }
             }
         }
-        if (!this.checkGameOver()) {
-            if (isMove) {
-                this.addGrids();
-                this.drawGrids();
-            }
-        }
-        else {
-            this.gameOverHandle();
-        }
+        mergeTags = null;
+        this.afterMoving(isMove, increaseScore);
     };
-    Game.prototype.upMerge = function () {
+    Game.prototype.moveUp = function () {
         console.log('up');
-        var isMove = false, _grids = this._grids;
+        var isMove = false, // include merge and move
+        _grids = this._grids, mergeTags = {}, increaseScore = 0;
         for (var c = 0; c < this._col; c++) {
-            for (var r = 0; r < this._row; r++) {
-                for (var nextR = r + 1; nextR < this._row; nextR++) {
-                    if (_grids[nextR][c] > 0) {
-                        if (_grids[r][c] <= 0) {
-                            _grids[r][c] = _grids[nextR][c];
-                            _grids[nextR][c] = 0;
-                            nextR--;
-                            isMove = true;
-                        }
-                        else if (_grids[r][c] === _grids[nextR][c]) {
-                            _grids[r][c] *= 2;
-                            _grids[nextR][c] = 0;
-                            isMove = true;
-                            this.updateScore(_grids[r][c]);
-                        }
-                    }
+            for (var r = 1; r < this._row; r++) {
+                // console.log('_grids[' + (r - 1) + ']['+ c +']', _grids[r - 1][c])
+                if (_grids[r][c] === 0)
+                    continue;
+                if (_grids[r - 1][c] === 0) {
+                    _grids[r - 1][c] = _grids[r][c];
+                    _grids[r][c] = 0;
+                    r = 0;
+                    isMove = true;
+                }
+                else if (_grids[r - 1][c] === _grids[r][c] && !(mergeTags['' + (r - 1) + c] || mergeTags['' + r + c])) {
+                    increaseScore = _grids[r - 1][c] *= 2;
+                    _grids[r][c] = 0;
+                    mergeTags['' + (r - 1) + c] = true;
+                    r = 0;
+                    isMove = true;
                 }
             }
         }
-        if (!this.checkGameOver()) {
-            if (isMove) {
-                this.addGrids();
-                this.drawGrids();
-            }
-        }
-        else {
-            this.gameOverHandle();
-        }
+        console.log('mergeTags', mergeTags);
+        mergeTags = null;
+        this.afterMoving(isMove, increaseScore);
     };
-    Game.prototype.downMerge = function () {
+    Game.prototype.moveDown = function () {
         console.log('down');
-        var isMove = true, _grids = this._grids;
+        var isMove = false, // include merge and move
+        _grids = this._grids, mergeTags = {}, increaseScore = 0;
         for (var c = 0; c < this._col; c++) {
-            for (var r = this._row - 1; r >= 0; r--) {
-                for (var prevR = r - 1; prevR >= 0; prevR--) {
-                    if (_grids[prevR][c] > 0) {
-                        if (_grids[r][c] <= 0) {
-                            _grids[r][c] = _grids[prevR][c];
-                            _grids[prevR][c] = 0;
-                            prevR++;
-                            isMove = true;
-                        }
-                        else if (_grids[r][c] === _grids[prevR][c]) {
-                            _grids[r][c] *= 2;
-                            _grids[prevR][c] = 0;
-                            isMove = true;
-                            this.updateScore(_grids[r][c]);
-                        }
-                    }
+            for (var r = this._row - 2; r >= 0; r--) {
+                // console.log('_grids[' + (r + 1) + ']['+ c +']', _grids[r + 1][c])
+                if (_grids[r][c] === 0)
+                    continue;
+                if (_grids[r + 1][c] === 0) {
+                    _grids[r + 1][c] = _grids[r][c];
+                    _grids[r][c] = 0;
+                    r = this._row - 1;
+                    isMove = true;
+                }
+                else if (_grids[r + 1][c] === _grids[r][c] && !(mergeTags['' + (r + 1) + c] || mergeTags['' + r + c])) {
+                    increaseScore = _grids[r + 1][c] *= 2;
+                    _grids[r][c] = 0;
+                    mergeTags['' + (r + 1) + c] = true;
+                    r = this._row - 1;
+                    isMove = true;
                 }
             }
         }
+        console.log('mergeTags', mergeTags);
+        mergeTags = null;
+        this.afterMoving(isMove, increaseScore);
+    };
+    Game.prototype.afterMoving = function (isMove, increaseScore) {
+        if (increaseScore === void 0) { increaseScore = 0; }
         if (!this.checkGameOver()) {
             if (isMove) {
+                this.updateScore(increaseScore);
                 this.addGrids();
+                console.log('isMove');
                 this.drawGrids();
             }
         }
@@ -343,8 +334,9 @@ var Game = (function (_super) {
         var gameOverEvent = new GameOverEvent(GameOverEvent.NAME);
         setTimeout(function () {
             _this.stage.dispatchEvent(gameOverEvent);
-        }, 1000);
+        }, 400);
     };
+    // 根据剩余空格数添加 2个 以下的数字
     Game.prototype.addGrids = function () {
         // 找出所有为0的格子
         var emptyGrids = [];
@@ -361,19 +353,24 @@ var Game = (function (_super) {
         // 判断空格还有几个，若 >= 2，则添加两个，否则添加剩余数量的格子
         var needAddGridsAmount = Math.min(this._addGridAmount, emptyGrids.length);
         var finalNeedToAddGridsCoord = [];
+        // 随机抽取空格 grid（个数<=2）
         for (var i = 0; i < needAddGridsAmount; i++) {
             var index = this.getRandomInt(0, emptyGrids.length - 1);
             finalNeedToAddGridsCoord.push(emptyGrids[index]);
             emptyGrids.splice(index, 1);
         }
+        // 为先前抽取的空格子随机填入 2 或 4
         for (var i = 0; i < finalNeedToAddGridsCoord.length; i++) {
             var x = finalNeedToAddGridsCoord[i].x;
             var y = finalNeedToAddGridsCoord[i].y;
             this._grids[x][y] = this.getNewNumber();
         }
     };
+    // 若 gird 不为 0，则绘制
     Game.prototype.drawGrids = function () {
+        // 先删全部
         this._gridsDisplayContainer.removeChildren();
+        // 绘制非空格子
         for (var i = 0; i < this._row; i++) {
             for (var j = 0; j < this._col; j++) {
                 if (this._grids[i][j] !== 0) {
@@ -426,6 +423,8 @@ var Game = (function (_super) {
         return (row + 1) * this._gridSpacing + row * this._gridWidth;
     };
     Game.prototype.onGameTouchBegin = function (event) {
+        if (Main.isGameOver)
+            return;
         var target = event.currentTarget;
         target.touchX = event.stageX;
         target.touchY = event.stageY;
@@ -442,51 +441,53 @@ var Game = (function (_super) {
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             if (deltaX < 0) {
                 // left
-                this.leftMerge();
+                this.moveToLeft();
             }
             else {
                 // right
-                this.rightMerge();
+                this.moveToRight();
             }
         }
         else {
             if (deltaY < 0) {
                 // up
-                this.upMerge();
+                this.moveUp();
             }
             else {
                 // down
-                this.downMerge();
+                this.moveDown();
             }
         }
         this.removeEventListener(egret.TouchEvent.TOUCH_MOVE, this.onGameTouchMove, this);
     };
     Game.onKeyup = function (event) {
+        if (Main.isGameOver)
+            return;
         var key = event.key;
         switch (key) {
             case 'a':
             case 'A':
             case 'ArrowLeft':
                 // left
-                Game.instance.leftMerge();
+                Game.instance.moveToLeft();
                 break;
             case 'd':
             case 'D':
             case 'ArrowRight':
                 // right
-                Game.instance.rightMerge();
+                Game.instance.moveToRight();
                 break;
             case 'w':
             case 'W':
             case 'ArrowUp':
                 // up
-                Game.instance.upMerge();
+                Game.instance.moveUp();
                 break;
             case 's':
             case 'S':
             case 'ArrowDown':
                 // down
-                Game.instance.downMerge();
+                Game.instance.moveDown();
                 break;
         }
     };
