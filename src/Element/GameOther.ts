@@ -3,16 +3,14 @@
 class GameOther extends egret.DisplayObjectContainer {
 	public constructor() {
 		super()
-
 		this.addGameBg()
 		this.addGameName()
 		this.addGameSlogan()
 		this.addHowToPlay()
 		this.addCopyRight()
-
 		return this
 	}
-	
+
 	private addGameName():void {
         let gameName: egret.TextField = new egret.TextField()
         gameName.text = '2048'

@@ -16,6 +16,7 @@ class Game extends egret.DisplayObjectContainer{
 
 	private _x:number = Main.paddingLeft
 	private _y:number = 150 * 2
+	private _two_probability = 0.9
 	private _sideLength: number = 282 * 2
 	private _gridAmount:number = 16
 	private _gridSpacing:number = 10 * 2
@@ -462,7 +463,7 @@ class Game extends egret.DisplayObjectContainer{
 	
 	private getNewNumber():number {
 		let probability:number = Math.random()
-		return probability < 0.9 ? 2 : 4
+		return probability < this._two_probability ? 2 : 4
 	}
 
 	private addMainBg():void {

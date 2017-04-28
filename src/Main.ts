@@ -35,8 +35,8 @@ class Main extends egret.DisplayObjectContainer {
      */
     public static instance: Main
     private loadingView: LoadingUI
-    private scorePanel: RoundRect
-    private bestPanel: RoundRect
+    private scorePanel: Score
+    private bestPanel: Best
     private restartBtn: RestartBtn
     private gameOverDialog: GameOverDialog
     private gameOther: GameOther
@@ -45,10 +45,11 @@ class Main extends egret.DisplayObjectContainer {
     static readonly GAME_BG_COLOR:number = 0x8DECD3
     static readonly FONT_COLOR:number = 0x5FB4AE
     static readonly FONT_FAMILY:string = 'PingFang SC'
+    static readonly paddingTop:number = 20 * 2
+    static readonly paddingLeft:number = 47 * 2
+
     static stageW:number = 0
     static stageH:number = 0
-    static paddingTop:number = 20 * 2
-    static paddingLeft:number = 47 * 2
 
     static score:number = 0
     static best: number = 0
@@ -146,16 +147,16 @@ class Main extends egret.DisplayObjectContainer {
         Main.stageW = this.stage.stageWidth
         Main.stageH = this.stage.stageHeight
 
-        // 按照游戏的层级关系进行添加元素，否则会盖住
+
         this.gameOther = new GameOther()
         this.stage.addChild(this.gameOther)
 
-        this.scorePanel = new RoundRect(199 * 2, Main.paddingTop, 'SCORE', 0);
+        this.scorePanel = new Score(199 * 2, Main.paddingTop, 'SCORE', 0);
         this.stage.addChild(this.scorePanel);
 
         let best = JSON.parse(egret.localStorage.getItem('best'))
         if(best === undefined || best === null) best = 0
-        this.bestPanel = new RoundRect(269 * 2, Main.paddingTop, 'BEST', best);
+        this.bestPanel = new Best(269 * 2, Main.paddingTop, 'BEST', best);
         this.stage.addChild(this.bestPanel);
 
         this.restartBtn = new RestartBtn(210 * 2, 85 * 2)
@@ -164,7 +165,6 @@ class Main extends egret.DisplayObjectContainer {
         this.game = new Game()
         this.stage.addChild(this.game)
 
-        // this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this) // this 参数用于指定回调函数内的this
         this.stage.addEventListener(GameOverEvent.NAME, this.gameOverHandle, this)
         if(Main.isGameOver) {
             this.gameOverDialog = new GameOverDialog()

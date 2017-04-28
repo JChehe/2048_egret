@@ -116,21 +116,19 @@ var Main = (function (_super) {
     Main.prototype.createGameScene = function () {
         Main.stageW = this.stage.stageWidth;
         Main.stageH = this.stage.stageHeight;
-        // 按照游戏的层级关系进行添加元素，否则会盖住
         this.gameOther = new GameOther();
         this.stage.addChild(this.gameOther);
-        this.scorePanel = new RoundRect(199 * 2, Main.paddingTop, 'SCORE', 0);
+        this.scorePanel = new Score(199 * 2, Main.paddingTop, 'SCORE', 0);
         this.stage.addChild(this.scorePanel);
         var best = JSON.parse(egret.localStorage.getItem('best'));
         if (best === undefined || best === null)
             best = 0;
-        this.bestPanel = new RoundRect(269 * 2, Main.paddingTop, 'BEST', best);
+        this.bestPanel = new Best(269 * 2, Main.paddingTop, 'BEST', best);
         this.stage.addChild(this.bestPanel);
         this.restartBtn = new RestartBtn(210 * 2, 85 * 2);
         this.stage.addChild(this.restartBtn);
         this.game = new Game();
         this.stage.addChild(this.game);
-        // this.restartBtn.addEventListener(RestartEvent.NAME, this.restartHandle, this) // this 参数用于指定回调函数内的this
         this.stage.addEventListener(GameOverEvent.NAME, this.gameOverHandle, this);
         if (Main.isGameOver) {
             this.gameOverDialog = new GameOverDialog();
@@ -167,10 +165,10 @@ var Main = (function (_super) {
 Main.GAME_BG_COLOR = 0x8DECD3;
 Main.FONT_COLOR = 0x5FB4AE;
 Main.FONT_FAMILY = 'PingFang SC';
-Main.stageW = 0;
-Main.stageH = 0;
 Main.paddingTop = 20 * 2;
 Main.paddingLeft = 47 * 2;
+Main.stageW = 0;
+Main.stageH = 0;
 Main.score = 0;
 Main.best = 0;
 Main.isGameOver = false;

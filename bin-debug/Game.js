@@ -12,6 +12,7 @@ var Game = (function (_super) {
         var _this = _super.call(this) || this;
         _this._x = Main.paddingLeft;
         _this._y = 150 * 2;
+        _this._two_probability = 0.9;
         _this._sideLength = 282 * 2;
         _this._gridAmount = 16;
         _this._gridSpacing = 10 * 2;
@@ -388,7 +389,7 @@ var Game = (function (_super) {
     };
     Game.prototype.getNewNumber = function () {
         var probability = Math.random();
-        return probability < 0.9 ? 2 : 4;
+        return probability < this._two_probability ? 2 : 4;
     };
     Game.prototype.addMainBg = function () {
         var mainBg = new egret.Shape();
